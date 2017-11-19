@@ -1,75 +1,73 @@
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
 // tombstones.h, expected interface for CSC254 assignment 5
 /////////////////////////////////////////////////////////////////////////////
 
+
 #if !defined(__TOMBSTONES_H__)
 #define __TOMBSTONES_H__
+
+#include <iostream>
+#include <stdlib.h>
 
 template <class T> class Pointer;
 template <class T> void free(Pointer<T>& obj);
 
 template <class T> class Pointer {
 private:
-  T*  pData;
+  T* tStone;
+  T** ptStone;
 public:
 
-    // Default constructor, set to null
-    Pointer<T>() : pData(nullptr) {}
+    // Default constructor
+    Pointer<T>() : tStone(0), ptStone(0) {}
     
-    // Constructor to copy pointer
-    Pointer<T>(Pointer<T>& rhs) 
+    // Copy constructor
+    Pointer<T>(Pointer<T>& rhs) : tStone(rhs.tStone), ptStone(rhs.ptStone) {}
+
+    // Boostrapping Constructor
+    Pointer<T>(T* pVal)
     {
-        // Transfer rhs to pData
-        pData = rhs.pData;
-
-        // Set rhs to 0
-        // {Question} Is there another way to delete rhs?
-        rhs.pData = 0;
+        // std::cout << "MERP: " << pVal << std::endl;
+        tStone = pVal;      // Tombstone contains the address of the object
+        ptStone = &tStone;  // Pointer contains the address of the tombstone    
     }
-
-    // Constructor for a pointer to object
-    Pointer<T>(T* pVal) : pData(pVal) {}
 
     // Destroy a pointer
     ~Pointer<T>()
     {
-        delete pData;
+        delete tStone;
+        
     }
 
     // Dereferencer
     T& operator*() const
     {
-        return *pData;
+        return *tStone;
     }
 
     // Field Dereferecer
     T* operator->() const
     {
-        return pData;
+        return tStone;
     }
 
     // Assignment to our pointer
     Pointer<T>& operator=(const Pointer<T>& rhs)
     {
+        // Self Assignment Check
         if(this == &rhs) {
             return *this;
         }
-
-        delete pData;
-
-        pData = rhs.pData;
-        rhs.pData = 0;
+        
+        tStone = rhs.tStone;
+        ptStone = rhs.ptStone;
 
         return *this;
     }
 
     // Delete the object that is being pointed at
-    friend void free<T>(Pointer<T>& rhs)
-    {
-        
-    }
-
-
+    friend void free(Pointer<T>&);
+    
     bool operator==(const Pointer<T>&) const;
     bool operator!=(const Pointer<T>&) const;
     bool operator==(const int) const;

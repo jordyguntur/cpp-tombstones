@@ -20,6 +20,9 @@ int main(int argc, char **argv)
     Pointer<int> tmp((int*)NULL);
     Pointer<int> bar = tmp;
 
+    cout << "TEST: " << *foo << endl;
+    // cout << "TEST-2: " << *bar << endl;
+
     // if (foo == 0)
     // error("Foo shouldn't be null!");
     // if (bar != 0)
