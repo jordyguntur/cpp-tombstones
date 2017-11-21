@@ -16,9 +16,16 @@ template <class T> class Tombstone
 public:
     int refCount;
     T* pointee;
+    bool isFree;
 
-    Tombstone<T>() : pointee(0), refCount(0) {}
-    Tombstone<T>(T* ptrIn) : pointee(ptrIn), refCount(1) {}
+    Tombstone<T>() : pointee(0), refCount(0) 
+    {
+        isFree = false;
+    }
+    Tombstone<T>(T* ptrIn) : pointee(ptrIn), refCount(1)
+    {
+        isFree = false;
+    }
 
     void addRef() {
         refCount++;
@@ -39,21 +46,21 @@ public:
     // Default constructor
     Pointer<T>() : tStone()
     {    
-        std::cout << "Default Constructor" << std::endl;
+        // std::cout << "Default Constructor" << std::endl;
     }
     
     // Copy constructor
     Pointer<T>(Pointer<T>& rhs) : tStone(rhs.tStone)
     {        
-        std::cout << "Copy Constructor" << std::endl;
+        // std::cout << "Copy Constructor" << std::endl;
         tStone->addRef();
-        // std::cout << tStone->refCount << " = " << rhs.tStone->refCount << std::endl;
+        // std::cout << tStone << " = " << rhs.tStone << std::endl;
     }
 
     // Boostrapping Constructor
     Pointer<T>(T* pVal)
     {
-        std::cout << "Boostrapping Constructor" << std::endl;
+        // std::cout << "Boostrapping Constructor" << std::endl;
         tStone = new Tombstone<T>();
         tStone->pointee = pVal;
         tStone->addRef();
@@ -63,7 +70,7 @@ public:
     // Destroy a pointer
     ~Pointer<T>()
     {
-        std::cout << "Destructor" << std::endl;
+        // std::cout << "Destructor" << std::endl;
         tStone->release();
         // std::cout << tStone->refCount << std::endl;
         if(tStone->refCount <= 0) {
@@ -74,25 +81,21 @@ public:
     // Dereferencer
     T& operator*() const
     {
-        std::cout << "Dereference" << std::endl;
+        // std::cout << "Dereference" << std::endl;
         return *tStone->pointee;
     }
 
     // Field Dereferencer
     T* operator->() const
     {
-        std::cout << "Field Dereferencer" << std::endl;
+        // std::cout << "Field Dereferencer" << std::endl;
         return tStone->pointee;
     }
 
     // Assignment to our pointer
     Pointer<T>& operator=(const Pointer<T>& rhs)
     {   
-        std::cout << "Assignment" << std::endl;
-
-        if(tStone->refCount == 0) {
-        }
-        
+        // std::cout << "Assignment" << std::endl;    
         tStone = rhs.tStone;
         tStone->addRef();
         return *this;
@@ -101,14 +104,21 @@ public:
     // Delete the object that is being pointed at
     friend void free(Pointer<T>& rhs)
     {
-        std::cout << "Free" << std::endl;
-        std::cout << rhs.tStone->refCount << std::endl;
+        // std::cout << "Free" << std::endl;
+        // std::cout << rhs.tStone->pointee << std::endl;
+
+        if(rhs.tStone->isFree == true) {
+            std::cout << "######################################################" << std::endl;
+            std::cout << "Error: Pointer already freed. Exiting program." << std::endl;
+            std::cout << "######################################################" << std::endl;
+            exit(-1);
+        }
+        rhs.tStone->isFree = true;
         
         if(rhs.tStone->refCount == 0 && rhs.tStone) {
             delete rhs.tStone->pointee;
             delete rhs.tStone;
         }
-
     }
     
     bool operator==(const Pointer<T>& ptrIn) const
