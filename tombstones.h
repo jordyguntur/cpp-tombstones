@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <stdlib.h>
+#include <exception>
 
 template <class T> class Pointer;
 template <class T> void free(Pointer<T>& obj);
@@ -21,7 +22,7 @@ public:
     Pointer<T>() : tStone(0)
     {    
         // std::cout << "Default Constructor: " << this << std::endl;
-        refCount = 0;
+        refCount++;
     }
     
     // Copy constructor
@@ -29,7 +30,7 @@ public:
     {
         // std::cout << "Copy Constructor: " << this << std::endl;
         tStone = rhs.tStone;
-        refCount = 0;
+        refCount = rhs.refCount;
         refCount++;
     }
 
@@ -38,13 +39,16 @@ public:
     {
         // std::cout << "Boostrapping Constructor: " << this << std::endl;
         tStone = pVal;
-        refCount = 0;
+        refCount++;
     }
 
     // Destroy a pointer
     ~Pointer<T>()
     {
         refCount--;
+        if(refCount <= 0) {
+            delete tStone;
+        }
         // std::cout << "Destruction: " << this << " Reference Count: " << refCount << std::endl;
     }
 
@@ -65,8 +69,13 @@ public:
     {   
         // std::cout << "ASSIGNMENT " << std::endl;
         // std::cout << this << " = to " << &rhs << std::endl;        
-        refCount++;
+        if(refCount == 0 && tStone) {
+            delete tStone;
+        }
+
         tStone = rhs.tStone;
+        refCount = rhs.refCount;
+        refCount++;
         // std::cout << this << " = to " << &rhs << std::endl;
         
         return *this;
@@ -75,12 +84,10 @@ public:
     // Delete the object that is being pointed at
     friend void free(Pointer<T>& ptr)
     {
-        ptr.tStone = 0;
-        if(ptr.tStone != 0) {
-            free(&*ptr);    
-        } else {
-            std::cout << "Throw an error" << std::endl;
+        if (ptr.refCount <= 0) {
+            delete ptr.tStone;
         }
+        
     }
     
     bool operator==(const Pointer<T>& ptrIn) const
