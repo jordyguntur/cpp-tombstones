@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     Pointer<int> foo(new int(12));
     Pointer<int> tmp((int*)NULL);
     Pointer<int> bar = tmp;
-
+    
     if (foo == 0)
 	error("Foo shouldn't be null!");
     if (bar != 0)

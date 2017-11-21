@@ -7,92 +7,113 @@
 
 #include <iostream>
 #include <stdlib.h>
-#include <exception>
 
 template <class T> class Pointer;
 template <class T> void free(Pointer<T>& obj);
 
-template <class T> class Pointer {
-private:
-  T* tStone;
-  int refCount;
+template <class T> class Tombstone
+{
 public:
+    int refCount;
+    T* pointee;
 
-    // Default constructor
-    Pointer<T>() : tStone(0)
-    {    
-        // std::cout << "Default Constructor: " << this << std::endl;
+    Tombstone<T>() : pointee(0), refCount(0) {}
+    Tombstone<T>(T* ptrIn) : pointee(ptrIn), refCount(1) {}
+
+    void addRef() {
         refCount++;
+    }
+    void release() {
+        refCount--;
+    }
+    int refCountCheck() {
+        return refCount;
+    }
+};
+
+template <class T> class Pointer 
+{
+private:
+    Tombstone<T>* tStone;
+public:
+    // Default constructor
+    Pointer<T>() : tStone()
+    {    
+        std::cout << "Default Constructor" << std::endl;
     }
     
     // Copy constructor
-    Pointer<T>(Pointer<T>& rhs)
-    {
-        // std::cout << "Copy Constructor: " << this << std::endl;
-        tStone = rhs.tStone;
-        refCount = rhs.refCount;
-        refCount++;
+    Pointer<T>(Pointer<T>& rhs) : tStone(rhs.tStone)
+    {        
+        std::cout << "Copy Constructor" << std::endl;
+        tStone->addRef();
+        // std::cout << tStone->refCount << " = " << rhs.tStone->refCount << std::endl;
     }
 
     // Boostrapping Constructor
     Pointer<T>(T* pVal)
     {
-        // std::cout << "Boostrapping Constructor: " << this << std::endl;
-        tStone = pVal;
-        refCount++;
+        std::cout << "Boostrapping Constructor" << std::endl;
+        tStone = new Tombstone<T>();
+        tStone->pointee = pVal;
+        tStone->addRef();
+        // std::cout << tStone->refCount << std::endl;
     }
 
     // Destroy a pointer
     ~Pointer<T>()
     {
-        refCount--;
-        if(refCount <= 0) {
+        std::cout << "Destructor" << std::endl;
+        tStone->release();
+        // std::cout << tStone->refCount << std::endl;
+        if(tStone->refCount <= 0) {
             delete tStone;
         }
-        // std::cout << "Destruction: " << this << " Reference Count: " << refCount << std::endl;
     }
 
     // Dereferencer
     T& operator*() const
     {
-        return *tStone;
+        std::cout << "Dereference" << std::endl;
+        return *tStone->pointee;
     }
 
     // Field Dereferencer
     T* operator->() const
     {
-        return tStone;
+        std::cout << "Field Dereferencer" << std::endl;
+        return tStone->pointee;
     }
 
     // Assignment to our pointer
     Pointer<T>& operator=(const Pointer<T>& rhs)
     {   
-        // std::cout << "ASSIGNMENT " << std::endl;
-        // std::cout << this << " = to " << &rhs << std::endl;        
-        if(refCount == 0 && tStone) {
-            delete tStone;
-        }
+        std::cout << "Assignment" << std::endl;
 
-        tStone = rhs.tStone;
-        refCount = rhs.refCount;
-        refCount++;
-        // std::cout << this << " = to " << &rhs << std::endl;
+        if(tStone->refCount == 0) {
+        }
         
+        tStone = rhs.tStone;
+        tStone->addRef();
         return *this;
     }
     
     // Delete the object that is being pointed at
-    friend void free(Pointer<T>& ptr)
+    friend void free(Pointer<T>& rhs)
     {
-        if (ptr.refCount <= 0) {
-            delete ptr.tStone;
-        }
+        std::cout << "Free" << std::endl;
+        std::cout << rhs.tStone->refCount << std::endl;
         
+        if(rhs.tStone->refCount == 0 && rhs.tStone) {
+            delete rhs.tStone->pointee;
+            delete rhs.tStone;
+        }
+
     }
     
     bool operator==(const Pointer<T>& ptrIn) const
     {
-        if(ptrIn.tStone == tStone) {
+        if(tStone == ptrIn.tStone) {
             return true;
         } else {    
             return false;
@@ -115,7 +136,6 @@ public:
         return !(number == 0);
         // false iff Pointer is null and int is zero    
     }
-
     
     // bool operator==(const int n, const Pointer<T>& t) 
     // { 

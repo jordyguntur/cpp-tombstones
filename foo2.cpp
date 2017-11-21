@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     *foo = 15;
     if (*bar != 15)
 	error("Bar should still match foo!");
-
+    
     free(foo);
     free(bar);
     error("Attempt to double-delete pointer not flagged!");
