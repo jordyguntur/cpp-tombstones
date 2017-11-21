@@ -19,22 +19,28 @@ int main(int argc, char **argv)
     Pointer<int> foo(new int(12));
     Pointer<int> tmp((int*)NULL);
     Pointer<int> bar = tmp;
+    
+    if (foo == 0)
+    error("Foo shouldn't be null!");
+    if (bar != 0)
+    error("Bar should be null!");
+    
+    cout << "TEST:" << endl;
 
-    cout << "TEST: " << *foo << endl;
-    // cout << "TEST-2: " << *bar << endl;
+    bar = new int(12); 
+    
+    cout << "BAR: " << *bar << endl;  
+    cout << "TEST:" << endl;
 
-    // if (foo == 0)
-    // error("Foo shouldn't be null!");
-    // if (bar != 0)
-    // error("Bar should be null!");
-    // bar = new int(12);
-    // if (foo == bar)
-    // error("Foo and bar are distinct pointers!");
-    // if (*foo != *bar)
-    // error("Foo and bar should have the same value here!");
+    if (foo == bar)
+    error("Foo and bar are distinct pointers!");
+    
+    if (*foo != *bar) {    
+        error("Foo and bar should have the same value here!");        
+    }    
 
-    // free(foo);
-    // free(bar);
-    // cout << "foo1: OK" << endl;
+    free(foo);
+    free(bar);
+    cout << "foo1: OK" << endl;
     return 0;
 }

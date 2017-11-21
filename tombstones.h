@@ -1,7 +1,6 @@
-    /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 // tombstones.h, expected interface for CSC254 assignment 5
 /////////////////////////////////////////////////////////////////////////////
-
 
 #if !defined(__TOMBSTONES_H__)
 #define __TOMBSTONES_H__
@@ -15,28 +14,38 @@ template <class T> void free(Pointer<T>& obj);
 template <class T> class Pointer {
 private:
   T* tStone;
-  T** ptStone;
+  int refCount;
 public:
 
     // Default constructor
-    Pointer<T>() : tStone(0), ptStone(0) {}
+    Pointer<T>() : tStone(0)
+    {    
+        // std::cout << "Default Constructor: " << this << std::endl;
+        refCount = 0;
+    }
     
     // Copy constructor
-    Pointer<T>(Pointer<T>& rhs) : tStone(rhs.tStone), ptStone(rhs.ptStone) {}
+    Pointer<T>(Pointer<T>& rhs)
+    {
+        // std::cout << "Copy Constructor: " << this << std::endl;
+        tStone = rhs.tStone;
+        refCount = 0;
+        refCount++;
+    }
 
     // Boostrapping Constructor
     Pointer<T>(T* pVal)
     {
-        // std::cout << "MERP: " << pVal << std::endl;
-        tStone = pVal;      // Tombstone contains the address of the object
-        ptStone = &tStone;  // Pointer contains the address of the tombstone    
+        // std::cout << "Boostrapping Constructor: " << this << std::endl;
+        tStone = pVal;
+        refCount = 0;
     }
 
     // Destroy a pointer
     ~Pointer<T>()
     {
-        delete tStone;
-        
+        refCount--;
+        // std::cout << "Destruction: " << this << " Reference Count: " << refCount << std::endl;
     }
 
     // Dereferencer
@@ -45,7 +54,7 @@ public:
         return *tStone;
     }
 
-    // Field Dereferecer
+    // Field Dereferencer
     T* operator->() const
     {
         return tStone;
@@ -53,28 +62,64 @@ public:
 
     // Assignment to our pointer
     Pointer<T>& operator=(const Pointer<T>& rhs)
-    {
-        // Self Assignment Check
-        if(this == &rhs) {
-            return *this;
-        }
-        
+    {   
+        // std::cout << "ASSIGNMENT " << std::endl;
+        // std::cout << this << " = to " << &rhs << std::endl;        
+        refCount++;
         tStone = rhs.tStone;
-        ptStone = rhs.ptStone;
-
+        // std::cout << this << " = to " << &rhs << std::endl;
+        
         return *this;
     }
-
+    
     // Delete the object that is being pointed at
-    friend void free(Pointer<T>&);
+    friend void free(Pointer<T>& ptr)
+    {
+        ptr.tStone = 0;
+        if(ptr.tStone != 0) {
+            free(&*ptr);    
+        } else {
+            std::cout << "Throw an error" << std::endl;
+        }
+    }
     
-    bool operator==(const Pointer<T>&) const;
-    bool operator!=(const Pointer<T>&) const;
-    bool operator==(const int) const;
+    bool operator==(const Pointer<T>& ptrIn) const
+    {
+        if(ptrIn.tStone == tStone) {
+            return true;
+        } else {    
+            return false;
+        }
+    }
+
+    bool operator!=(const Pointer<T>& ptrIn) const
+    {
+        return (tStone != ptrIn.tStone);
+    }
+
+    bool operator==(const int number) const
+    {
+        return (number == 0) && (tStone == 0);
+        // true iff Pointer is null and int is zero
+    }
     
-    // true iff Pointer is null and int is zero
-    bool operator!=(const int) const;
-    // false iff Pointer is null and int is zero
+    bool operator!=(const int number) const
+    {
+        return !(number == 0);
+        // false iff Pointer is null and int is zero    
+    }
+
+    
+    // bool operator==(const int n, const Pointer<T>& t) 
+    // { 
+    //     return t == n; 
+    // }
+
+    // bool operator!=(const int n, const Pointer<T>& t) 
+    // {
+    //     return t != n; 
+    // }
+    
 };
 
 

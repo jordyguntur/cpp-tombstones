@@ -32,6 +32,7 @@ int main(int argc, char **argv)
 
     free(foo);
     free(bar);
+    
     cout << "foo1: OK" << endl;
     return 0;
 }
