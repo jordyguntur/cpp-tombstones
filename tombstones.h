@@ -89,14 +89,29 @@ public:
     T& operator*() const
     {
         std::cout << "Dereference" << std::endl;
-        return *tStone->pointee;
+        if(tStone->pointee == NULL) {
+            std::cout << "######################################################" << std::endl;
+            std::cout << "Error: Dangling Pointer Exception." << std::endl;
+            std::cout << "######################################################" << std::endl;
+            exit(-1);
+        } else {
+            return *tStone->pointee;
+        }
     }
 
     // Field Dereferencer
     T* operator->() const
     {
         std::cout << "Field Dereferencer" << std::endl;
-        return tStone->pointee;
+        if(tStone->pointee == NULL) {
+            std::cout << "######################################################" << std::endl;
+            std::cout << "Error: Dangling Pointer Exception." << std::endl;
+            std::cout << "######################################################" << std::endl;
+            exit(-1);
+        } else {
+            return tStone->pointee;
+        }
+        
     }
 
     // Assignment to our pointer
