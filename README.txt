@@ -1,9 +1,3 @@
-University of Rochester
-CSC 254 -- Fall 2017
-Assignment 05: Tombstones
-Jordy Guntur (jguntur@u.rochester.edu)
-Marcelo Gheiler (mgheiler@u.rochester.edu)
-
 Files Submitted
 
 tombstones.h
